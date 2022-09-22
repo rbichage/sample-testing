@@ -1,18 +1,17 @@
 package com.reuben.sampletesting
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.reuben.sampletesting.data.NoPersonsFoundException
 import com.reuben.sampletesting.data.PeopleRepository
 import com.reuben.sampletesting.data.Person
 import com.reuben.sampletesting.data.Result
 import com.reuben.sampletesting.data.asResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
@@ -23,22 +22,30 @@ class PersonsViewModel(
 ) : ViewModel() {
 
     private var _uiState: MutableStateFlow<PersonsUIState> = MutableStateFlow(PersonsUIState.Idle)
-    val uiState: StateFlow<PersonsUIState>
-        get() = _uiState
+    val uiState = _uiState.asStateFlow()
 
     fun getPeople() {
+
         viewModelScope.launch(dispatcher) {
-            _uiState.value = PersonsUIState.Idle
+            _uiState.value = PersonsUIState.Loading
 
             peopleStream.collect { result ->
-                Log.e("VIEWMODEL: result is ", "$result")
                 when (result) {
                     is Result.Success -> {
-                        delay(1000L)
                         _uiState.value = PersonsUIState.People(result.data)
                     }
                     is Result.Error -> {
-                        _uiState.value = PersonsUIState.Error(result.exception?.message.orEmpty())
+                        val message = when (result.exception) {
+                            is NoPersonsFoundException -> {
+                                result.exception.errorMessage
+                            }
+                            else -> {
+                                result.exception?.message.orEmpty()
+                            }
+                        }
+
+                        _uiState.value = PersonsUIState.Error(message)
+
                     }
                 }
             }
@@ -46,7 +53,6 @@ class PersonsViewModel(
 
         }
     }
-
 
 
     private val peopleStream = flow {
@@ -63,6 +69,7 @@ class PersonsViewModel(
 
 sealed interface PersonsUIState {
     object Idle : PersonsUIState
+    object Loading : PersonsUIState
     data class People(val data: List<Person>) : PersonsUIState
     data class Error(val errorMessage: String) : PersonsUIState
 }

@@ -1,23 +1,36 @@
 package com.reuben.sampletesting
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.After
+import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class MainActivityTests {
+class MainActivityTest {
+    @get: Rule
+    val scenario = ActivityScenarioRule(MainActivity::class.java)
 
-    @get:Rule
-    val rule = ActivityScenarioRule(MainActivity::class.java)
+    private lateinit var context: Context
 
-    @Test
-    fun test_activity_is_Visible() {
-        onView(withId(R.id.main_activity_rule)).check(matches(isDisplayed()))
+    @Before
+    fun setup() {
+        context = ApplicationProvider.getApplicationContext()
+    }
+
+
+
+    @After
+    fun tearDown() {
     }
 }

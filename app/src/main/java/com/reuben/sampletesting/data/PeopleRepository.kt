@@ -34,7 +34,7 @@ class MockSuccessPeopleRepository(
 }
 
 class MockFailureRepository(
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO, val errorMessage: String
+    dispatcher: CoroutineDispatcher = Dispatchers.IO, val errorMessage: String
 ) : MockPeopleRepository(dispatcher) {
     override suspend fun getPeople(): List<Person> {
         throw NoPersonsFoundException(errorMessage)

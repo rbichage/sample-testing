@@ -28,6 +28,9 @@ class SecondFragment : Fragment() {
     private val viewModelFactory =
         PersonsViewModel.PersonsFactory(PeopleRepositoryImpl(api = PeopleApiImpl()))
 
+
+
+
     private val personsViewModel: PersonsViewModel by viewModels { viewModelFactory }
 
     private val peopleAdapter by lazy {
@@ -63,6 +66,7 @@ class SecondFragment : Fragment() {
                             binding.recyclerPeople.adapter = peopleAdapter
                             peopleAdapter.submitList(uistate.data)
                         }
+                        PersonsUIState.Loading -> {}
                     }
                 }
             }
